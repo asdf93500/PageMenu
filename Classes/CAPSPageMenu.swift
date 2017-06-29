@@ -1,3 +1,4 @@
+
 //  CAPSPageMenu.swift
 //
 //  Niklas Fahl
@@ -16,23 +17,20 @@
 //  PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
 //  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 //  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 import UIKit
 
 @objc public protocol CAPSPageMenuDelegate {
     // MARK: - Delegate functions
-
     @objc optional func willMoveToPage(_ controller: UIViewController, index: Int)
     @objc optional func didMoveToPage(_ controller: UIViewController, index: Int)
 }
 
 open class CAPSPageMenu: UIViewController {
-
+    
     //MARK: - Configuration
     var configuration = CAPSPageMenuConfiguration()
     
     // MARK: - Properties
-
     let menuScrollView = UIScrollView()
     let controllerScrollView = UIScrollView()
     var controllerArray : [UIViewController] = []
@@ -43,37 +41,36 @@ open class CAPSPageMenu: UIViewController {
     
     var startingMenuMargin : CGFloat = 0.0
     var menuItemMargin : CGFloat = 0.0
-
+    
     var selectionIndicatorView : UIView = UIView()
-
+    
     public var currentPageIndex : Int = 0
     var lastPageIndex : Int = 0
-
+    
     var currentOrientationIsPortrait : Bool = true
     var pageIndexForOrientationChange : Int = 0
     var didLayoutSubviewsAfterRotation : Bool = false
     var didScrollAlready : Bool = false
-
+    
     var lastControllerScrollViewContentOffset : CGFloat = 0.0
-
+    
     var lastScrollDirection : CAPSPageMenuScrollDirection = .other
     var startingPageForScroll : Int = 0
     var didTapMenuItemToScroll : Bool = false
-
+    
     var pagesAddedDictionary : [Int : Int] = [:]
-
+    
     open weak var delegate : CAPSPageMenuDelegate?
-
+    
     var tapTimer : Timer?
-
+    
     enum CAPSPageMenuScrollDirection : Int {
         case left
         case right
         case other
     }
-
+    
     // MARK: - View life cycle
-
     /**
      Initialize PageMenu with view controllers
      
@@ -104,17 +101,16 @@ open class CAPSPageMenu: UIViewController {
     }
     
     /**
-    Initialize PageMenu with view controllers
-
-    - parameter viewControllers: List of view controllers that must be subclasses of UIViewController
-    - parameter frame: Frame for page menu view
-    - parameter configuration: A configuration instance for page menu
-    */
+     Initialize PageMenu with view controllers
+     - parameter viewControllers: List of view controllers that must be subclasses of UIViewController
+     - parameter frame: Frame for page menu view
+     - parameter configuration: A configuration instance for page menu
+     */
     public init(viewControllers: [UIViewController], frame: CGRect, configuration: CAPSPageMenuConfiguration) {
         super.init(nibName: nil, bundle: nil)
         self.configuration = configuration
         controllerArray = viewControllers
-
+        
         self.view.frame = frame
         
         //Build UI
@@ -154,7 +150,7 @@ open class CAPSPageMenu: UIViewController {
             configureUserInterface()
         }
     }
-
+    
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)!
     }
@@ -162,7 +158,7 @@ open class CAPSPageMenu: UIViewController {
 
 
 
-extension CAPSPageMenu {    
+extension CAPSPageMenu {
     // MARK: - Handle Selection Indicator
     func moveSelectionIndicator(_ pageIndex: Int) {
         if pageIndex >= 0 && pageIndex < controllerArray.count {
@@ -240,11 +236,14 @@ extension CAPSPageMenu {
         
         let oldCurrentOrientationIsPortrait : Bool = currentOrientationIsPortrait
         
-        if UIDevice.current.orientation != UIDeviceOrientation.unknown {
-            currentOrientationIsPortrait = UIDevice.current.orientation.isPortrait || UIDevice.current.orientation.isFlat
+        let orientation = UIApplication.shared.statusBarOrientation
+        
+        if orientation != .unknown {
+            currentOrientationIsPortrait = orientation.isPortrait
         }
         
-        if (oldCurrentOrientationIsPortrait && UIDevice.current.orientation.isLandscape) || (!oldCurrentOrientationIsPortrait && (UIDevice.current.orientation.isPortrait || UIDevice.current.orientation.isFlat)) {
+        if (oldCurrentOrientationIsPortrait && orientation.isLandscape) || (!oldCurrentOrientationIsPortrait && (orientation.isPortrait)) {
+            
             didLayoutSubviewsAfterRotation = true
             
             //Resize menu items if using as segmented control
